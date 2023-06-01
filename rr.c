@@ -1,121 +1,187 @@
 #include<stdio.h>
-#include<string.h>
-struct process{
-char name[10];
-int at;
-int bt;
-int ct;
-int rbt;
-}p[10],ready[10],c[10],temp;
-int tq,front=0,rear=0,crear=-1;
-void round(int n);
-void main()
-{
-int n,i,j;
-printf("Enter the number of process and tq\n");
-scanf("%d%d",&n,&tq);
-for(i=0;i<n;i++)
-{
-printf("Enter the name,bt,at\n");
-scanf("%s%d%d",p[i].name,&p[i].bt,&p[i].at);
-p[i].rbt=p[i].bt;
-}
-for(i=0;i<n;i++)
-{
+#include<stdlib.h>
+int i,j,n,time=0,tempt=0,c,z=0,x=0,tar=0;
 
-for(j=0;j<n-1;j++)
+struct Process
 {
-if(p[j].at>p[j+1].at)
-{
-temp=p[j];
-p[j]=p[j+1];
-p[j+1]=temp;
-}
-}
-}
+ int pid;
+ int wt;
+ int bt;
+ int at;
+ int ct;
+ int tat;
+ int rt;
+ int flag;
+}p[10],temp[10],temp1[10],temp3[30];
+ 
+int at[10],flag,tq;
+float avgtat,avgwt;
 
-round(n);
-}
-void round(int n)
+void sort()
 {
-
-int tot=0,i,ft,start,k=0,j,wt=0,tat=0;
-ready[front]=p[k++];
-while(front<=rear)
-{
-if(ready[front].rbt<=tq){
-ready[front].ct=tot+ready[front].rbt;
-ready[front].rbt=0;
-c[++crear]=ready[front];
-
-tot=ready[front].ct;
-if(k<n)
-ready[++rear]=p[k++];
-
-}
-else{
-ready[front].ct=tot+tq;
-ready[front].rbt=ready[front].rbt-tq;
-tot=ready[front].ct;
-for(i=k;i<n;i++)
-{
-if(p[i].at<=ready[front].ct)
-{
-ready[++rear]=p[i];
-k++;
-}
-}
-if(ready[front].rbt>0)
-ready[++rear]=ready[front];
-else
-c[++crear]=ready[front];
-}
-front++;
-}
-printf("Process\t\tArrivat_time\t\tBurst_time\t\tTurnaround_time\t\twaiting time\n\n");
-for(i=0;i<n;i++)
-{
-printf("%s\t\t\t%d\t\t\t%d\t\t\t\t%d\t\t\t%d\n\n",c[i].name,c[i].at,c[i].bt,(c[i]
-.ct-c[i].at),((c[i].ct-c[i].at)-c[i].bt));
-wt=wt+(c[i].ct-c[i].at)-c[i].bt;
-tat=tat+(c[i].ct-c[i].at);
+ for(i=0;i<n;i++)
+ {
+    for(j=0;j<n-i-1;j++)
+    {
+   	 if(p[j+1].at<p[j].at)
+   	 {
+   	 temp1[0]=p[j];
+   	 p[j]=p[j+1];
+   	 p[j+1]=temp1[0];
+   	 }
+    }
+ }
 }
 
-printf("\n\n");
-printf("\nGantt Chart\n\n");
-for(i=0;i<=rear;i++)
+void compute()
 {
-j=0;
-printf(" ___");
-for(j=0;j<tq;j++)
-printf("__");
+ int y=n;
+ for(i=0;i<n;i++)
+ {
+ 
+ if(p[i].bt>tq)
+ {
+    p[i].rt=tq;    
+    time+=tq;    
+    tar=0;
+    for(int j=i+1;j<n;j++)
+    {
+   	 if(p[j].at<=time)
+   	 tar++;
+    }   		 
+ 
+    for(int j=n-1;j>i+tar;j--)
+    {
+   	 p[j+1]=p[j];
+    }    
+    p[i+tar+1]=p[i];   				 
+    p[i+tar+1].bt=p[i+tar+1].bt-tq;   				 
+    n++;
+ }
+ 
+ else
+ {
+  p[i].rt=p[i].bt;
+  time+=p[i].rt;
+  p[i].ct=time;
+ }
+ 
+ }
+ 
+ z=0;
+ for(int i=0;i<n;i++)
+ {
+    if(p[i].ct!=0)
+    {
+   	 temp[z]=p[i];
+   	 flag=0;
+   	 for(int j=0;j<i;j++)
+   	 {
+   		 if(p[i].pid==p[j].pid && flag==0)
+   		 {
+   		 temp[z].bt=p[j].bt;
+   		 flag=1;
+   		 }   	 
+   	 }
+   	 z++;
+    }
+ }
+ 
+ for(i=0;i<z;i++)
+ {
+    temp[i].tat=temp[i].ct-temp[i].at;
+    temp[i].wt=temp[i].tat-temp[i].bt;    
+    avgwt+=temp[i].wt;
+    avgtat+=temp[i].tat;
+ }
+ avgtat=avgtat/y;
+ avgwt=avgwt/y;
 }
-printf("\n");
-printf("|");
-for(i=0;i<=rear;i++)
+
+void table()
 {
-printf(" %s",ready[i].name);
-j=0;
-
-for(j=0;j<tq;j++)
-printf("__");
-printf("|");
+ printf("\n");
+ printf("*----------------------------------------------------------------------------------------------*\n");
+ printf("|  Pid  |  Arrival Time  |  Burst Time  |  Turn Around Time  |  Waiting Time  |  Completion Time\n");
+ printf("*----------------------------------------------------------------------------------------------*\n");
+ for(i=0;i<z;i++)
+ {
+    printf("|  %2d  |  	%2d    	  |  	%2d  	 |      	%2d    	  |  	%2d    	   |  	%2d    	    |\n",temp[i].pid,temp[i].at,temp[i].bt,temp[i].tat,temp[i].wt,temp[i].ct);
+ }
+ printf("*----------------------------------------------------------------------------------------------*\n");
 }
-printf("\n");
-printf("0");
-for(i=0;i<=rear;i++)
+
+void ganttchart()
 {
-printf(" ");
-j=0;
-for(j=0;(tq>=ready[i].ct)?j<ready[i].ct:j<tq;j++)
-printf(" ");
+    //gant chart(Topline)
+ printf("\n\n\t\tGantt Chart\n\n ");
+ for(i=0;i<n;i++)
+ {
+    for(int j=0;j<p[i].rt;j++)
+    printf("--");
+  printf(" ");
+ }    
+ printf("\n ");
+ for(i=0;i<n;i++)
+ {
+    for(int j=0;j<p[i].rt-1;j++)
+    printf(" ");
+ 
+    printf("P%d",p[i].pid);
+ 
+    for(int j=0;j<p[i].rt-1;j++)
+    printf(" ");
+    printf("|");
+ }    
+ printf("\n ");
+ 
+ //bottomline
+ for(i=0;i<n;i++)
+ {
+    for(int j=0;j<p[i].rt;j++)
+    printf("--");
+  printf(" ");
+ }    
+ printf("\n");
 
-printf("%d",ready[i].ct);
+//num
+ printf("0");
+ time=0;
+ for(i=0;i<n;i++)
+ {
+    for(j=0;j<p[i].rt;j++)
+    {    
+    printf("  ");
+    time++;
+    }    
+    printf("\b");
+    if (time>10)
+    printf("\b");
+ 
+    printf("%d ",time);
+ 
+ }
 }
-printf("\n\n");
-printf("avg wt = %.2f\n",((float)wt/(float)n));
-printf("avg tat = %.2f\n",((float)tat/(float)n));
 
-printf("\n\n");
-
+int main()
+{
+ printf("Enter Time Quanta: ");
+ scanf("%d",&tq);
+ printf("Enter Total Number of Process: ");
+ scanf("%d",&n);
+ 
+ for(i=0;i<n;i++)
+  {
+   p[i].pid=i+1;
+   printf("Enter Arrival Time of Process %d: ",i+1);
+   scanf("%d",&p[i].at);
+   printf("Enter Burst Time of Process %d: ",i+1);
+   scanf("%d",&p[i].bt);
+  }
+ sort();
+ compute();
+ table();
+ ganttchart();
+ printf("\n\nAvarage Waiting Time=%.2f\nAvarage Turn Around Time=%.2f\n",avgwt,avgtat);
+ 
 }
