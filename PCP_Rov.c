@@ -14,7 +14,7 @@ void *producer(void *arg)
     buffer[put%5]=item;
 
     int *myid = (int *)arg;
-    printf("PRODUCER %d PRODUCES %d ITEM => BUFFER[%d] : %d\n",*myid,buffer[put%5],put%5,item);
+    printf("PRODUCER PRODUCES ITEM => %d\n",buffer[put%5]);
     item++;
     put++;
     sem_post(&mutex);
@@ -31,7 +31,7 @@ void *consumer(void *arg)
     sem_wait(&mutex);
     gitem=buffer[get%5];
     int *myid = (int *)arg;
-    printf("CONSUMER %d CONSUMES %d ITEM OF BUFFER[%d]\n",*myid,gitem,get%5);
+    printf("CONSUMER CONSUMES ITEM => [%d]\n",gitem);
     get++;
     sem_post(&mutex);
     sem_post(&empty);
