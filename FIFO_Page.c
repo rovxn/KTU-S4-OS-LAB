@@ -50,6 +50,8 @@ void main()
 		}
 	}
 	printf("\nPAGE FAULT : %d\n",cnt);
-	int hitr=
+	int hitr=(n-cnt)*100/n;
+	int missr=(cnt)*100/n;
+	printf("\nHIT RATIO : %d\n",hitr);
+	printf("\nMISS RATIO : %d\n",missr);
 }
-//To Be Completed
